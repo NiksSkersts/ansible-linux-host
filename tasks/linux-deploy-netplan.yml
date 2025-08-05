@@ -1,0 +1,28 @@
+---
+
+- name: Deploy network config
+  become: true
+  block:
+
+    - name: Deploy Netplan config
+      notify: apply-netplan
+      when: linux_host_netplan_config is defined
+      ansible.builtin.copy:
+        content: |
+          {{ linux_host_netplan_config }}
+        dest: /etc/netplan/{{ netplan_config_name }}
+        group: root
+        owner: root
+        mode: '700'
+
+    - name: Deploy 20-connectivity.conf
+      notify: enable-and-start-network-manager
+      when:
+        - nm_connectivity_enabled
+        - nm_connectivity_uri is defined
+      ansible.builtin.template:
+        src: 20-connectivity.j2
+        dest: /etc/NetworkManager/conf.d/20-connectivity.conf
+        group: root
+        owner: root
+        mode: '700'

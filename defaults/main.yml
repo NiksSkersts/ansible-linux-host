@@ -1,0 +1,35 @@
+---
+# defaults file for linux_host
+os_update: true
+user_defs: []
+pkgs: []
+netplan: false
+nfs_mountpoints: []
+
+nm_connectivity_enabled: true
+nm_connectivity_uri: http://connectivity-check.ubuntu.com/
+nm_connectivity_interval: 300
+
+# ALLOY
+alloy_gpg_key_url: https://apt.grafana.com/gpg.key
+alloy_path: /etc/apt/keyrings/grafana.asc
+alloy_arch: amd64
+alloy_apt_url: https://apt.grafana.com
+alloy_comp: stable main
+
+# RSYSLOG
+rsyslog_target: log.local
+rsyslog_port: 514
+rsyslog_protocol: tcp
+rsyslog_template: RSYSLOG_SyslogProtocol23Format
+
+# If you wish to completely override, then you can define rsyslog_config variable with your own config
+rsyslog_config: |
+  *.* action(type="omfwd"
+        queue.type="linkedlist"
+        queue.filename="fwd.list"
+        action.resumeRetryCount="-1"
+        queue.saveOnShutdown="on"
+        target="{{ monitoring_target }}" port="{{ monitoring_port }}" protocol="{{ monitoring_protocol }}"
+        template="{{ monitoring_template }}"
+       )

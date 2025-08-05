@@ -1,0 +1,59 @@
+---
+# handlers file for linux_host
+- name: reload-nfs
+  become: true
+  ansible.builtin.command: 'exportfs -ra'
+
+- name: reload-samba
+  become: true
+  ansible.builtin.command: 'smbcontrol smbd reload-config'
+
+- name: reload-rsyslog
+  become: true
+  ansible.builtin.systemd_service:
+    name: rsyslog
+    state: restarted
+
+- name: enable-now-rsyslog
+  become: true
+  ansible.builtin.systemd_service:
+    name: rsyslog
+    state: started
+    enabled: true
+
+- name: reload-alloy
+  become: true
+  ansible.builtin.systemd_service:
+    name: alloy
+    state: restarted
+
+- name: enable-now-alloy
+  become: true
+  ansible.builtin.systemd_service:
+    name: alloy
+    state: started
+    enabled: true
+
+- name: reload-loki
+  become: true
+  ansible.builtin.systemd_service:
+    name: loki
+    state: restarted
+
+- name: enable-now-loki
+  become: true
+  ansible.builtin.systemd_service:
+    name: loki
+    state: started
+    enabled: true
+
+- name: apply-netplan
+  become: true
+  ansible.builtin.command:
+    cmd: netplan apply
+
+- name: enable-and-start-network-manager
+  ansible.builtin.systemd_service:
+    state: started
+    enabled: true
+    name: NetworkManager

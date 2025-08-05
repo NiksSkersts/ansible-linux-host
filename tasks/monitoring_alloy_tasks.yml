@@ -1,0 +1,22 @@
+- name: Install Alloy
+  block:
+
+    - name: Get GPG key
+      ansible.builtin.get_url:
+        url: '{{ alloy_gpg_key_url }}'
+        dest: '{{ alloy_path }}'
+        mode: '0644'
+        force: true
+
+    - name: Add Repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ alloy_arch }} signed-by={{ alloy_path }}] {{ alloy_apt_url }} {{ alloy_comp }}"
+        state: present
+        update_cache: true
+
+    - name: Install Alloy
+      notify: enable-now-alloy
+      ansible.builtin.apt:
+        name:
+          - alloy
+        state: present

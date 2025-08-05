@@ -1,0 +1,45 @@
+---
+
+- name: "Configure user: {{ item.user }}"
+  block:
+
+    - name: "User {{ item.user + ': ' + item.state }}"
+      become: true
+      when: not item.set_ssh_keys_only | default(false)
+      ansible.builtin.user:
+        append: "{{ item.append | default(omit) }}"
+        state: "{{ item.state }}"
+        name: "{{ item.user }}"
+        uid: "{{ item.uid | default(omit) }}"
+        create_home: "{{ item.home | default(false) }}"
+        group: "{{ item.group | default(omit) }}"
+        groups: "{{ item.groups | default(omit) }}"
+        shell: "{{ item.shell | default('/sbin/nologin') }}"
+        system: "{{ item.system | default(false) }}"
+        password: "{{ item.password | default(omit) }}"
+        update_password: '{{ item.update_policy | default("on_create") }}'
+
+    - name: Set ssh pub keys for {{ item.user }}
+      become: true
+      when:
+        - item.ssh_pub_key is defined
+        - item.ssh_pub_key | length > 0
+        - item.state == 'present'
+      ansible.posix.authorized_key:
+        user: "{{ item.user }}"
+        state: present
+        key: "{{ item.ssh_pub_key }}"
+        manage_dir: true
+
+    - name: Write ssh priv key file to .ssh
+      become: true
+      when:
+        - item.ssh_priv_key is defined
+        - item.ssh_priv_key | length > 0
+        - item.state == 'present'
+      ansible.builtin.copy:
+        src: "{{ item.ssh_priv_key }}"
+        dest: ~/.ssh/
+        mode: "0700"
+        owner: "{{ item.user }}"
+        group: "{{ item.group | default(omit) }}"

@@ -1,0 +1,16 @@
+galaxy_info:
+
+  author: 'Niks Skersts <mail@nikssk.id.lv>'
+
+  company: 'nikssk.id.lv'
+
+  description: Role for configuring Linux based hosts
+
+  license: MIT
+
+  min_ansible_version: 2.1
+
+  galaxy_tags:
+    - Proxmox
+
+dependencies: []

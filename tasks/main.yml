@@ -1,0 +1,77 @@
+---
+# tasks file for linux_host
+
+- name: OS Configuration
+  block:
+
+    - name: Run system update
+      tags: os_upgrade
+      when:
+        - os_update | default(false)
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: full
+
+    - name: Creating Users
+      loop: "{{ user_defs }}"
+      when:
+        - user_defs is defined
+        - user_defs | length > 0
+      ansible.builtin.include_tasks: create-linux-user.yml
+
+    - name: Show install pkgs
+      when: pkgs is defined
+      ansible.builtin.debug:
+        msg:
+          - Installing pkgs
+          - '{{ pkgs }}'
+
+    - name: Installing packages
+      become: true
+      when:
+        - pkgs is defined
+      ansible.builtin.package:
+        name: '{{ pkgs }}'
+        state: present
+        update_cache: true
+
+    - name: Import Tasks for monitoring (logs-alloy)
+      when: linux_host_alloy | default(false)
+      ansible.builtin.import_tasks: monitoring_alloy_tasks.yml
+
+    - name: Import Tasks for monitoring (logs-loki)
+      when: linux_host_loki | default(false)
+      ansible.builtin.import_tasks: monitoring_loki_tasks.yml
+
+    - name: Import Tasks for monitoring (logs-rsyslog)
+      when: linux_host_rsyslog | default(false)
+      ansible.builtin.import_tasks: monitoring_rsyslog_tasks.yml
+
+    - name: Mount disks
+      vars:
+        non_boot_disks: "{{ hostvars[inventory_hostname].diskn | default([]) | rejectattr('id', 'equalto', 1) | list }}"
+      when:
+        - non_boot_disks | length > 0
+        - false # Not ready yet
+      loop: "{{ non_boot_disks }}"
+      loop_control:
+        loop_var: item
+      ansible.builtin.include_tasks: "mount-disks.yml"
+
+    # TODO unmount old shares not present/disabled in new config
+    - name: Mount NFS shares
+      # vars:
+      #   nfs_mountpoints:
+      #     - 1:
+      #       nfs_dev: "nas.local:/mnt/pool/folder"
+      #       path: /path/to/folder
+      #       nfs_opts: "rw,sync,hard,noatime,rsize=8192,wsize=8192,tcp,timeo=14,nfsvers=4"
+      loop: "{{ nfs_mountpoints }}"
+      when:
+        - nfs_mountpoints is defined
+        - nfs_mountpoints | length > 0
+      ansible.builtin.include_tasks: "mount-nfs.yml"
+
+    - name: Include linux-deploy-netplan.yml
+      when: netplan | default(false)
+      ansible.builtin.include_tasks: linux-deploy-netplan.yml

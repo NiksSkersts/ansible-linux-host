@@ -1,0 +1,9 @@
+- name: Install Alloy
+  block:
+
+    - name: Install loki
+      notify: enable-now-loki
+      ansible.builtin.apt:
+        name:
+          - loki
+        state: present

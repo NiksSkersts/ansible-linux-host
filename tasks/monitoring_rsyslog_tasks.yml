@@ -1,0 +1,26 @@
+---
+
+- name: Rsyslog monitoring block
+  block:
+
+    - name: Install Rsyslog
+      notify: enable-now-rsyslog
+      ansible.builtin.apt:
+        name:
+          - rsyslog
+
+    - name: Deploy Rsyslog config
+      register: rsyslog_config_task
+      notify: reload-rsyslog
+      ansible.builtin.copy:
+        dest: /etc/rsyslog.d/log.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: '{{ rsyslog_config }}'
+
+    - name: Restart rsyslog
+      when: rsyslog_config_task.changed
+      ansible.builtin.systemd:
+        name: rsyslog
+        state: restarted
