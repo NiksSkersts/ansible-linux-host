@@ -10,7 +10,7 @@
       ansible.builtin.copy:
         content: |
           {{ linux_host_netplan_config }}
-        dest: /etc/netplan/{{ netplan_config_name }}
+        dest: /etc/netplan/{{ netplan_config_name }}.yaml
         group: root
         owner: root
         mode: '700'

@@ -6,6 +6,7 @@
 
     - name: Run system update
       tags: os_upgrade
+      become: true
       when:
         - os_update | default(false)
       ansible.builtin.apt:
