@@ -38,15 +38,15 @@
 
     - name: Import Tasks for monitoring (logs-alloy)
       when: linux_host_alloy | default(false)
-      ansible.builtin.import_tasks: monitoring_alloy_tasks.yml
+      ansible.builtin.import_tasks: monitoring-alloy-tasks.yml
 
     - name: Import Tasks for monitoring (logs-loki)
       when: linux_host_loki | default(false)
-      ansible.builtin.import_tasks: monitoring_loki_tasks.yml
+      ansible.builtin.import_tasks: monitoring-loki-tasks.yml
 
     - name: Import Tasks for monitoring (logs-rsyslog)
       when: linux_host_rsyslog | default(false)
-      ansible.builtin.import_tasks: monitoring_rsyslog_tasks.yml
+      ansible.builtin.import_tasks: monitoring-rsyslog-tasks.yml
 
     - name: Mount disks
       vars:
